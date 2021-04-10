@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  service-one:
+    image: service-one:0.0.1-SNAPSHOT
+    ports:
+      - 8100:8100
+    environment:
+      - SERVICE_TWO_HOST=service-two
+      - SERVICE_TWO_PORT=8200
+  service-two:
+    image: service-two:0.0.1-SNAPSHOT
+    ports:
+      - 8200:8200
+    environment:
+      - SERVICE_ONE_HOST=service-one
+      - SERVICE_ONE_PORT=8100

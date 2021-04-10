@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-one-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      component: service-one
+  template:
+    metadata:
+      labels:
+        component: service-one
+    spec:
+      containers:
+        - name: service-one
+          image: service-one:0.0.1-SNAPSHOT
+          imagePullPolicy: IfNotPresent # Do not pull from Docker Hub
+          ports:
+            - containerPort: 8100
+          env:
+            - name: SERVICE_TWO_HOST
+              value: service-two-cluster-ip
+            - name: SERVICE_TWO_PORT
+              value: '8200'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-one-cluster-ip
+spec:
+  type: ClusterIP
+  selector:
+    component: service-one
+  ports:
+    - port: 8100
+      targetPort: 8100

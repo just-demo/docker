@@ -1,0 +1,32 @@
+plugins {
+    id 'org.springframework.boot' version '2.4.4'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    group = 'demo'
+    version = '0.0.1-SNAPSHOT'
+    sourceCompatibility = '11'
+
+    repositories {
+        mavenCentral()
+    }
+
+    ext {
+        set('springCloudVersion', "2020.0.2")
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
