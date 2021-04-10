@@ -29,6 +29,7 @@ kind: Service
 metadata:
   name: service-two-cluster-ip
 spec:
+  #  type: LoadBalancer
   type: ClusterIP
   selector:
     component: service-two

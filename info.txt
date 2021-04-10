@@ -1,11 +1,18 @@
-########## run with docker-compose #########
+##################################################
+############# run with docker-compose ############
+##################################################
+
 gradlew bootBuildImage
 docker-compose up
 
-########## run with Kubernetes (k8s) ##########
+##################################################
+########### run with Kubernetes (k8s) ############
+##################################################
+
 Install minikube (automatically installs kubectl): https://minikube.sigs.k8s.io/docs/start/
 
-# Default driver does not support Ingress, Hyper-V needs to be enabled in Windows https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v
+# Default driver does not support Ingress, Hyper-V needs to be enabled in Windows
+# https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v
 # Hyper-V requires Administrator privileges
 minikube start --driver=hyperv
 minikube addons enable ingress
@@ -26,99 +33,67 @@ http://<minikube-ip>/two/all
 
 kubectl delete -f k8s
 minikube delete
-####################
 
+##################################################
+###### accessing services without Ingress ########
+##################################################
+
+# Accessing services without Ingress https://minikube.sigs.k8s.io/docs/handbook/accessing/
+# !!! Both variants seem do not seem to perform load balance per request, i.e. the same pod is always used !!!
+
+# Expose single service on 127.0.0.1 and randomly assigned port, browser is opened automatically, e.g. at http://127.0.0.1:56789/
+# It is possible to expose multiple services from different cmd windows
+# It works with both NodePort and LoadBalancer service types
+minikube service service-one-cluster-ip
+
+# Expose all services via 127.0.0.1 and defined ports (e.g. 8100, 8200)
+# https://minikube.sigs.k8s.io/docs/commands/tunnel/
+# It works with LoadBalancer service types only!
+minikube tunnel
+http://127.0.0.1:8100
+http://127.0.0.1:8100/all
+http://127.0.0.1:8200
+http://127.0.0.1:8200/all
+
+##################################################
+################ useful commands #################
+##################################################
 
 docker system prune
 docker image prune
-
-run:
-
 docker image ls
-kubectl get deployments
-kubectl get pods
-kubectl get events
-kubectl get replicaset
-kubectl gel all
-minikube ip
-192.168.49.2:8100
-
-kubectl create deployment service-one --image=service-one:0.0.3-SNAPSHOT
+-------------------------------------
+kubectl create deployment service-one --image=service-one:0.0.1-SNAPSHOT
 kubectl expose deployment service-one --type=NodePort --port=8100
-kubectl expose deployment service-one --type=LoadBalancer --port=8100
-minikube service service-one
-kubectl delete service service-one
-kubectl delete deployment service-one
-
-kubectl create deployment service-two --image=service-two:0.0.3-SNAPSHOT
-kubectl expose deployment service-two --type=LoadBalancer --port=8200
-minikube service service-two
-kubectl delete service service-two
-kubectl delete deployment service-two
-
-
-https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
-https://minikube.sigs.k8s.io/docs/commands/tunnel/
-minikube addons enable ingress
-# Verify that the NGINX Ingress controller is running https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
-kubectl get pods -n kube-system
-
-kubectl delete service service-one
 kubectl expose deployment service-one --type=LoadBalancer --port=8100
 kubectl scale deployment service-one --replicas=2
-
-#kubectl expose deployment service-one --type=NodePort --port=8100
-kubectl delete service service-two
-kubectl expose deployment service-two --type=LoadBalancer --port=8200
-#kubectl expose deployment service-two --type=NodePort --port=8200
-
-kubectl apply -f k8s/ingress.yaml
-kubectl get ingress
-# TODO: this does not require ingress, does ingress work on Windows?
-minikube tunnel
-kubectl delete -f k8s/ingress.yaml
-
-kubectl exec service-two-b5d8c9d55-4br62 -- printenv | findstr SERVICE
-kubectl logs service-two-b5d8c9d55-4br62
-kubectl delete pod <pod-name>
-
-kubectl delete all -l app=service-one
+kubectl get deployments
+kubectl get pods
+kubectl get pods --output=wide
+# To verify that the NGINX Ingress controller is running
+# https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
+kubectl get pods -n kube-system
+kubectl get events
+kubectl get replicaset
+kubectl get ingresses
+kubectl get all
 kubectl get services --watch
-############################
+kubectl get services kube-dns --namespace=kube-system
+kubectl get service service-one-cluster-ip
 
+kubectl exec <pod-name> -- printenv | findstr SERVICE
+kubectl logs <pod-name>
 kubectl cluster-info
-
 kubectl describe services service-one
 
-Port:                     <unset>  8100/TCP
-TargetPort:               8100/TCP
-NodePort:                 <unset>  30389/TCP
-
-kubectl get pods --output=wide
-kubectl get services kube-dns --namespace=kube-system
-
-
-minikube service --url service-one
-minikube service service-one
-
-# seems like not everything is working on Windows??? E.g EXTERNAL-IP is always pending!!!
-# to make ingress work start minikube as:
-minikube delete
-minikube addons enable ingress
-# run as Administrator:
-minikube start --driver=hyperv
-https://minikube.sigs.k8s.io/docs/handbook/accessing/
-
-kubectl expose deployment service-one --type=NodePort --port=8100
-kubectl get service service-one #NodePort=31765
-minikube ip #192.168.49.2
-192.168.49.2:31765
-
-########## export ##########
+kubectl delete service service-one-cluster-ip
+kubectl delete deployment service-one
+kubectl delete -f k8s/ingress.yaml
+kubectl delete pod <pod-name>
+kubectl delete all -l app=service-one
+-------------------------------------
+# Export existing state to yaml:
 kubectl get deployment service-one -o yaml > service-one-deployment.yaml
-kubectl get service service-one -o yaml > service-one-service.yaml
-
-kubectl get deployment service-two -o yaml > service-two-deployment.yaml
-kubectl get service service-two -o yaml > service-two-service.yaml
-
+kubectl get service service-one-cluster-ip -o yaml > service-one-service.yaml
 kubectl diff -f service-one-deployment.yaml
+##################################################
