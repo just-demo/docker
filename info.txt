@@ -39,7 +39,8 @@ minikube delete
 ##################################################
 
 # Accessing services without Ingress https://minikube.sigs.k8s.io/docs/handbook/accessing/
-# !!! Both variants seem do not seem to perform load balance per request, i.e. the same pod is always used !!!
+# Both approaches do not require hyperv driver!
+# !!! Both approaches seem do not seem to perform load balance per request, i.e. the same pod is always used !!!
 
 # Expose single service on 127.0.0.1 and randomly assigned port, browser is opened automatically, e.g. at http://127.0.0.1:56789/
 # It is possible to expose multiple services from different cmd windows
