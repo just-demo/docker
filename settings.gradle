@@ -1,3 +1,4 @@
 rootProject.name = 'docker'
 include 'service-one'
 include 'service-two'
+include 'mount-volume'

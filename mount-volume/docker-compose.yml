@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  mount-volume:
+    image: mount-volume:0.0.1-SNAPSHOT
+    ports:
+      - 8080:8080
+    environment:
+      - mounted.volume=/mounted/volume
+    volumes:
+      - ./volume:/mounted/volume
